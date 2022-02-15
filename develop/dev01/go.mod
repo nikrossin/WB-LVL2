@@ -1,4 +1,4 @@
-module lvl2
+module github.com/nikrossin/WB-LVL2/develop/dev01
 
 go 1.17
 
