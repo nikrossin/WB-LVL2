@@ -86,6 +86,6 @@ func main() {
 	boing.setSeats(167)
 	plane2 := boing.build()
 
-	fmt.Println(plane1, plane2)
+	fmt.Println(plane1, "", plane2)
 
 }
