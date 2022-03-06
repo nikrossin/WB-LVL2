@@ -2,16 +2,14 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"os"
 )
 
 func main() {
-	c := func() int {
-		a := 5
-		b := 6
-		if a == 5 {
-			return
-		}
-		return b
-	}
-	fmt.Println(c)
+
+	_, err := io.Copy(os.Stdin, os.Stdout)
+	fmt.Println("ok1")
+	fmt.Println(err)
+
 }
