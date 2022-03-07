@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"os"
 )
 
 func main() {
-
-	_, err := io.Copy(os.Stdin, os.Stdout)
-	fmt.Println("ok1")
-	fmt.Println(err)
-
+	if a, err := os.Stat("pattern"); err != nil {
+		fmt.Println("kek")
+	} else {
+		fmt.Println(a)
+	}
 }
