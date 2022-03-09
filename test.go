@@ -1,14 +1,19 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
+import "net/http"
+
+type kek func(int) int
+
+func (k kek) test(g int) {
+	k(5)
+}
 
 func main() {
-	if a, err := os.Stat("pattern"); err != nil {
-		fmt.Println("kek")
-	} else {
-		fmt.Println(a)
+	var a kek
+	a = func(b int) int {
+		return b + 1
 	}
+	http.HandlerFunc()
+	a.test(5)
+	http.ListenAndServe(":80", nil)
 }
