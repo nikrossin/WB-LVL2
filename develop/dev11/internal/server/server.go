@@ -37,15 +37,15 @@ func (s *Server) Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		timeStart := time.Now()
 		next.ServeHTTP(w, r)
-		log.Printf("%s\t%s\t%s\t%s\n", r.Method, r.URL, timeStart, time.Since(timeStart))
+		log.Printf("%s  %s  %s  %s\n", r.Method, r.URL, timeStart.Format("2006-01-02T15:04:05"), time.Since(timeStart))
 	})
 }
 
 func (s *Server) Run() {
-	s.SetRoutes()
+
 	serv := http.Server{
 		Addr:    s.Config.GetAddress(),
-		Handler: s.router,
+		Handler: s.SetRoutes(),
 	}
 	c := make(chan os.Signal, 1)
 	err := make(chan error)

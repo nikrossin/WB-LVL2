@@ -18,17 +18,36 @@ func NewHandler() *Handler {
 	}
 }
 
+type eventParse struct {
+	Uid         string `json:"uid"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	UserId      string `json:"user_id"`
+	Date        string `json:"date"`
+}
+
+func (ev *eventParse) ConvToModel() *calendar.Event {
+	event := calendar.NewEvent()
+	event.Uid = ev.Uid
+	event.Title = ev.Title
+	event.Description = ev.Description
+	event.UserId = ev.UserId
+	event.Date, _ = time.Parse("2006-01-02", ev.Date)
+	return event
+}
+
 func (h *Handler) AddEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
 		return
 	}
-	event := calendar.NewEvent()
-	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
+
+	ev := &eventParse{}
+	if err := json.NewDecoder(r.Body).Decode(ev); err != nil {
 		responseJSON(true, w, http.StatusBadRequest, err.Error())
 		return
 	}
-
+	event := ev.ConvToModel()
 	if !event.ValidateToCreate() {
 		responseJSON(true, w, http.StatusBadRequest, "User_id is empty or Time is not formated")
 		return
@@ -48,7 +67,7 @@ func (h *Handler) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !event.ValidateToUpdate() {
-		responseJSON(true, w, http.StatusBadRequest, "Time is not formated")
+		responseJSON(true, w, http.StatusBadRequest, "Time is not formatted")
 		return
 	}
 	if err := h.Calendar.UpdateEvent(event, event.Uid); err != nil {

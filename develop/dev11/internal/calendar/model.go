@@ -1,6 +1,8 @@
 package calendar
 
-import "time"
+import (
+	"time"
+)
 
 type Event struct {
 	Uid         string    `json:"uid"`
@@ -18,10 +20,10 @@ func (e *Event) ValidateToCreate() bool {
 	if e.UserId == "" || e.Title == "" {
 		return false
 	}
-	var err error
-	if e.Date, err = time.Parse("2006-01-02", e.Date.String()); err != nil {
+	//var err error
+	/*if _, err = time.Parse("2006-01-02", e.Date.String()); err != nil {
 		return false
-	}
+	}*/
 	return true
 }
 
@@ -31,7 +33,7 @@ func (e *Event) ValidateToUpdate() bool {
 	}
 	if !e.Date.IsZero() {
 		var err error
-		if e.Date, err = time.Parse("2006-01-02", e.Date.String()); err != nil {
+		if _, err = time.Parse("2006-01-02", e.Date.String()); err != nil {
 			return false
 		}
 	}
