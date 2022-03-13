@@ -18,24 +18,6 @@ func NewHandler() *Handler {
 	}
 }
 
-type eventParse struct {
-	Uid         string `json:"uid"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	UserId      string `json:"user_id"`
-	Date        string `json:"date"`
-}
-
-func (ev *eventParse) ConvToModel() *calendar.Event {
-	event := calendar.NewEvent()
-	event.Uid = ev.Uid
-	event.Title = ev.Title
-	event.Description = ev.Description
-	event.UserId = ev.UserId
-	event.Date, _ = time.Parse("2006-01-02", ev.Date)
-	return event
-}
-
 func (h *Handler) AddEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
@@ -47,11 +29,12 @@ func (h *Handler) AddEvent(w http.ResponseWriter, r *http.Request) {
 		responseJSON(true, w, http.StatusBadRequest, err.Error())
 		return
 	}
-	event := ev.ConvToModel()
-	if !event.ValidateToCreate() {
+	if !ev.ValidateToCreate() {
 		responseJSON(true, w, http.StatusBadRequest, "User_id is empty or Time is not formated")
 		return
 	}
+	event := ev.ConvToModel()
+
 	h.Calendar.CreateEvent(event)
 	responseJSON(false, w, http.StatusOK, "Event create")
 }
@@ -61,17 +44,21 @@ func (h *Handler) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
 		return
 	}
-	event := calendar.NewEvent()
-	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
+
+	ev := &eventParse{}
+	if err := json.NewDecoder(r.Body).Decode(ev); err != nil {
 		responseJSON(true, w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if !event.ValidateToUpdate() {
+	if !ev.ValidateToUpdate() {
 		responseJSON(true, w, http.StatusBadRequest, "Time is not formatted")
 		return
 	}
+
+	event := ev.ConvToModel()
 	if err := h.Calendar.UpdateEvent(event, event.Uid); err != nil {
 		responseJSON(true, w, http.StatusBadRequest, "With current UID is not found Event")
+		return
 	}
 	responseJSON(false, w, http.StatusOK, "Event update")
 }
@@ -81,17 +68,20 @@ func (h *Handler) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
 		return
 	}
-	event := calendar.NewEvent()
-	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
+
+	ev := &eventParse{}
+	if err := json.NewDecoder(r.Body).Decode(ev); err != nil {
 		responseJSON(true, w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if !event.ValidateToDelete() {
+	if !ev.ValidateToDelete() {
 		responseJSON(true, w, http.StatusBadRequest, "UID is empty")
 		return
 	}
-	if err := h.Calendar.DeleteEvent(event.Uid); err != nil {
+
+	if err := h.Calendar.DeleteEvent(ev.Uid); err != nil {
 		responseJSON(true, w, http.StatusBadRequest, err.Error())
+		return
 	}
 	responseJSON(false, w, http.StatusOK, "Event delete")
 }
@@ -101,10 +91,11 @@ func (h *Handler) GetEventForDay(w http.ResponseWriter, r *http.Request) {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
 		return
 	}
-	if !r.URL.Query().Has("uid") || !r.URL.Query().Has("date") {
+	if !r.URL.Query().Has("user_id") || !r.URL.Query().Has("date") {
 		responseJSON(true, w, http.StatusBadRequest, "Not enough parameters")
+		return
 	}
-	uidParam := r.URL.Query().Get("uid")
+	userIdParam := r.URL.Query().Get("user_id")
 	dateParam := r.URL.Query().Get("date")
 
 	date, err := time.Parse("2006-01-02", dateParam)
@@ -112,7 +103,7 @@ func (h *Handler) GetEventForDay(w http.ResponseWriter, r *http.Request) {
 		responseJSON(true, w, http.StatusBadRequest, err.Error())
 		return
 	}
-	events := h.Calendar.EventDay(uidParam, date)
+	events := h.Calendar.EventDay(userIdParam, date)
 	responseJSON(false, w, http.StatusOK, events)
 }
 
@@ -121,10 +112,11 @@ func (h *Handler) GetEventForWeek(w http.ResponseWriter, r *http.Request) {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
 		return
 	}
-	if !r.URL.Query().Has("uid") || !r.URL.Query().Has("date") {
+	if !r.URL.Query().Has("user_id") || !r.URL.Query().Has("date") {
 		responseJSON(true, w, http.StatusBadRequest, "Not enough parameters")
+		return
 	}
-	uidParam := r.URL.Query().Get("uid")
+	userIdParam := r.URL.Query().Get("user_id")
 	dateParam := r.URL.Query().Get("date")
 
 	date, err := time.Parse("2006-01-02", dateParam)
@@ -132,7 +124,7 @@ func (h *Handler) GetEventForWeek(w http.ResponseWriter, r *http.Request) {
 		responseJSON(true, w, http.StatusBadRequest, err.Error())
 		return
 	}
-	events := h.Calendar.EventWeek(uidParam, date)
+	events := h.Calendar.EventWeek(userIdParam, date)
 	responseJSON(false, w, http.StatusOK, events)
 }
 
@@ -141,10 +133,11 @@ func (h *Handler) GetEventForMonth(w http.ResponseWriter, r *http.Request) {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
 		return
 	}
-	if !r.URL.Query().Has("uid") || !r.URL.Query().Has("date") {
+	if !r.URL.Query().Has("user_id") || !r.URL.Query().Has("date") {
 		responseJSON(true, w, http.StatusBadRequest, "Not enough parameters")
+		return
 	}
-	uidParam := r.URL.Query().Get("uid")
+	userIdParam := r.URL.Query().Get("user_id")
 	dateParam := r.URL.Query().Get("date")
 
 	date, err := time.Parse("2006-01-02", dateParam)
@@ -152,6 +145,6 @@ func (h *Handler) GetEventForMonth(w http.ResponseWriter, r *http.Request) {
 		responseJSON(true, w, http.StatusBadRequest, err.Error())
 		return
 	}
-	events := h.Calendar.EventMonth(uidParam, date)
+	events := h.Calendar.EventMonth(userIdParam, date)
 	responseJSON(false, w, http.StatusOK, events)
 }

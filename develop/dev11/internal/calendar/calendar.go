@@ -89,7 +89,7 @@ func (c *CalendarMem) EventWeek(user string, date time.Time) []*Event {
 	for _, ev := range c.events {
 		startTime := date
 		endTime := date.AddDate(0, 0, 7)
-		if ev.UserId == user && ev.Date.After(startTime) && ev.Date.Before(endTime) && ev.Date.Equal(startTime) && ev.Date.Equal(endTime) {
+		if ev.UserId == user && (ev.Date.After(startTime) && ev.Date.Before(endTime) || ev.Date.Equal(startTime) || ev.Date.Equal(endTime)) {
 			events = append(events, ev)
 		}
 	}
@@ -103,7 +103,7 @@ func (c *CalendarMem) EventMonth(user string, date time.Time) []*Event {
 	for _, ev := range c.events {
 		startTime := date
 		endTime := date.AddDate(0, 1, 0)
-		if ev.UserId == user && ev.Date.After(startTime) && ev.Date.Before(endTime) && ev.Date.Equal(startTime) && ev.Date.Equal(endTime) {
+		if ev.UserId == user && (ev.Date.After(startTime) && ev.Date.Before(endTime) || ev.Date.Equal(startTime) || ev.Date.Equal(endTime)) {
 			events = append(events, ev)
 		}
 	}
