@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	time, err := ntp.Time("0.beevik-ntp.pool.ntp.qorg")
+	time, err := ntp.Time("0.beevik-ntp.pool.ntp.org")
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
