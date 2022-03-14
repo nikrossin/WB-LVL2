@@ -5,6 +5,7 @@ import (
 	"flag"
 )
 
+// Flags Хранение флагов
 type Flags struct {
 	AA int
 	BB int
@@ -15,16 +16,20 @@ type Flags struct {
 	F  bool
 	N  bool
 }
+
+// Config Конфигурация Grep
 type Config struct {
 	Flags
 	Pattern string
 	Files   []string
 }
 
+// NewConfig Создание конфигурации
 func NewConfig() *Config {
 	return &Config{}
 }
 
+// SetConfig Инициализация конфигурации
 func (c *Config) SetConfig() error {
 	flag.IntVar(&c.AA, "A", 0, "печатать +N строк после совпадения")
 	flag.IntVar(&c.BB, "B", 0, "печатать +N строк до совпадения")
@@ -38,11 +43,10 @@ func (c *Config) SetConfig() error {
 
 	if len(flag.Args()) < 1 {
 		return errors.New("No pattern")
-	} else {
-		c.Pattern = flag.Arg(0)
-		for i := 1; i < len(flag.Args()); i++ {
-			c.Files = append(c.Files, flag.Arg(i))
-		}
+	}
+	c.Pattern = flag.Arg(0)
+	for i := 1; i < len(flag.Args()); i++ {
+		c.Files = append(c.Files, flag.Arg(i))
 	}
 	return nil
 }

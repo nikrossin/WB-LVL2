@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// OR1 Каждый канал обрабатывается в своей горутине
 func OR1(channels ...<-chan interface{}) <-chan interface{} {
 	start := make(chan struct{})
 	done := make(chan interface{})
@@ -15,14 +16,15 @@ func OR1(channels ...<-chan interface{}) <-chan interface{} {
 	for _, ch := range channels {
 		go func(c <-chan interface{}) {
 			defer close(done)
-			<-start
+			<-start // маркер ожидание, пока не развернутся все горутины
 			<-c
 		}(ch)
 	}
 	close(start)
-	return done
+	return done // single канал
 }
 
+// OR2 Итеративно проверяем каждый канал в одной горутине
 func OR2(channels ...<-chan interface{}) <-chan interface{} {
 	done := make(chan interface{})
 	go func() {
@@ -42,19 +44,20 @@ func OR2(channels ...<-chan interface{}) <-chan interface{} {
 	return done
 }
 
+// OR3 Реализация на reflect
 func OR3(channels ...<-chan interface{}) <-chan interface{} {
 	done := make(chan interface{})
 	defer close(done)
-	var refChannels []reflect.SelectCase
+	var refChannels []reflect.SelectCase // слайс каналов
 	for _, ch := range channels {
 		refCh := reflect.SelectCase{
-			Dir:  reflect.SelectRecv,
-			Chan: reflect.ValueOf(ch),
+			Dir:  reflect.SelectRecv,  // <- chan
+			Chan: reflect.ValueOf(ch), // value
 		}
 		refChannels = append(refChannels, refCh)
 	}
 	reflect.Select(refChannels)
-	return done
+	return done // канал вернется после работы Select
 }
 
 func main() {
