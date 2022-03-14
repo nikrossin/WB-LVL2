@@ -14,6 +14,7 @@ import (
 	"syscall"
 )
 
+//Shell - структура параметров работы
 type Shell struct {
 	out             io.Writer
 	in              io.Reader
@@ -26,23 +27,25 @@ type Shell struct {
 	isPipe          bool
 }
 
+// NewShell Создать Объект Shell
 func NewShell(out io.Writer, in io.Reader) *Shell {
 	return &Shell{out: out, in: in}
 }
 
-// задаем цвета вывода в Shell
+// SetColors задаем цвета вывода в Shell
 func (s *Shell) SetColors(system, pathDir, input string) {
 	s.colorSystemUser = system
 	s.colorDir = pathDir
 	s.colorInput = input
 }
 
-// задаем имя системы и пользователя для отображения в Shell
+// SetSystem задаем имя системы и пользователя для отображения в Shell
 func (s *Shell) SetSystem(sys, usr string) {
 	s.nameSystem = sys
 	s.nameUser = usr
 }
 
+// Run Запустить shell
 func (s *Shell) Run() {
 	if err := s.ScanLines(); err != nil {
 		if _, err := fmt.Fprintln(s.out, err); err != nil {
@@ -51,20 +54,21 @@ func (s *Shell) Run() {
 	}
 }
 
-//вывод перед строкой ввода директории в которой находимся и пользователя
+// PrefixComm вывод перед строкой ввода директории в которой находимся и пользователя
 func (s *Shell) PrefixComm() error {
-	if dir, err := os.Getwd(); err != nil {
+	dir, err := os.Getwd()
+	if err != nil {
 		return err
-	} else {
-		_, err = fmt.Fprintf(s.out, "%v%v@%v:%v%v%v$ ", s.colorSystemUser, s.nameUser, s.nameSystem, s.colorDir, dir, s.colorInput)
-		if err != nil {
-			log.Fatalln(err)
-		}
 	}
+	_, err = fmt.Fprintf(s.out, "%v%v@%v:%v%v%v$ ", s.colorSystemUser, s.nameUser, s.nameSystem, s.colorDir, dir, s.colorInput)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	return nil
 }
 
-// читаем команды до \quit
+// ScanLines читаем команды до \quit
 func (s *Shell) ScanLines() error {
 	sc := bufio.NewScanner(s.in)
 	if err := s.PrefixComm(); err != nil {
@@ -86,7 +90,7 @@ func (s *Shell) ScanLines() error {
 	return nil
 }
 
-// Обработка строки на наличие конвеера
+// CheckPipes Обработка строки на наличие конвеера
 func (s *Shell) CheckPipes(line string) error {
 	lineCmd := strings.Split(line, "|")
 	if len(lineCmd) > 1 { // если конвеер
@@ -95,20 +99,23 @@ func (s *Shell) CheckPipes(line string) error {
 		for index, comm := range lineCmd {
 			if index != 0 { // если не первая команда то разбиваем ее ( для args)
 				commSl := strings.Fields(comm)
+
 				if len(commSl) > 1 { // если args есть у команды, то заменяем их на значения из буфера
 					commSlNew := make([]string, 2, 2)
 					commSlNew[0], commSlNew[1] = commSl[0], s.buffPipe.String()
 					commSl = commSlNew
 				} else {
 					commSl = append(commSl, s.buffPipe.String()) // просто добавление args из буфера
+
 				}
 				comm = strings.Join(commSl, " ")
 			}
+			s.buffPipe.Reset()
 			if index == len(lineCmd)-1 { // если команда последняя - вывод в stdout, а не в буффер
 				s.isPipe = false
-				s.buffPipe.Reset()
 			}
-			if err := s.CaseCommand(comm); err != nil {
+
+			if err := s.caseCommand(comm); err != nil {
 
 				if _, err = fmt.Fprintln(s.out, err); err != nil {
 					return err
@@ -118,7 +125,7 @@ func (s *Shell) CheckPipes(line string) error {
 		}
 
 	} else { // если нет конвеера
-		if err := s.CaseCommand(line); err != nil {
+		if err := s.caseCommand(line); err != nil {
 			if _, err = fmt.Fprintln(s.out, err); err != nil {
 				return err
 			}
@@ -127,7 +134,7 @@ func (s *Shell) CheckPipes(line string) error {
 	return nil
 }
 
-//Обработка строки на наличие fork()
+// CheckFork Обработка строки на наличие fork()
 func (s *Shell) CheckFork(line string) error {
 	line = strings.TrimRight(line, " ")
 	if strings.Contains(line, "&") {
@@ -163,19 +170,18 @@ func (s *Shell) cd(param string) error {
 }
 
 func (s *Shell) pwd() error {
-	if dir, err := os.Getwd(); err != nil {
+	dir, err := os.Getwd()
+	if err != nil {
 		return err
-	} else {
-		if s.isPipe {
-			if _, err := fmt.Fprintln(s.buffPipe, dir); err != nil {
-				return err
-			}
-		} else {
-			if _, err := fmt.Fprintln(s.out, dir); err != nil {
-				return err
-			}
+	}
+	if s.isPipe {
+		if _, err := fmt.Fprintln(s.buffPipe, dir); err != nil {
+			return err
 		}
-
+	} else {
+		if _, err := fmt.Fprintln(s.out, dir); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -215,20 +221,20 @@ func (s *Shell) echo(args []string, fullComm string) error {
 }
 
 func (s *Shell) ps() error {
-	if procs, err := ps.Processes(); err != nil {
+	procs, err := ps.Processes()
+	if err != nil {
 		return err
-	} else {
-		output := s.out
-		if s.isPipe {
-			output = s.buffPipe
-		}
-		if _, err := fmt.Fprintf(output, "%50v%10v%10v\n", "CMD", "PID", "PPI"); err != nil {
+	}
+	output := s.out
+	if s.isPipe {
+		output = s.buffPipe
+	}
+	if _, err := fmt.Fprintf(output, "%50v%10v%10v\n", "CMD", "PID", "PPI"); err != nil {
+		return err
+	}
+	for _, proc := range procs {
+		if _, err := fmt.Fprintf(output, "%50v%10v%10v\n", proc.Executable(), proc.Pid(), proc.PPid()); err != nil {
 			return err
-		}
-		for _, proc := range procs {
-			if _, err := fmt.Fprintf(output, "%50v%10v%10v\n", proc.Executable(), proc.Pid(), proc.PPid()); err != nil {
-				return err
-			}
 		}
 	}
 	return nil
@@ -253,7 +259,7 @@ func (s *Shell) exec(args []string) error {
 	return nil
 }
 
-func (s *Shell) CaseCommand(comm string) error {
+func (s *Shell) caseCommand(comm string) error {
 	if setComm := strings.Fields(comm); len(setComm) != 0 {
 		switch setComm[0] {
 		case "cd":
@@ -278,7 +284,7 @@ func (s *Shell) CaseCommand(comm string) error {
 			if len(setComm) >= 2 {
 				errs := s.kill(setComm[1:])
 				for _, err := range errs {
-					if _, err := fmt.Fprintf(s.out, "%v ", err); err != nil {
+					if _, err := fmt.Fprintf(s.out, "%v\n", err); err != nil {
 						return err
 					}
 				}
