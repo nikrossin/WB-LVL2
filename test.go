@@ -1,12 +1,14 @@
 package main
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 func main() {
-	str := "    aaaaaa   bbbb \n\n\n"
-	fmt.Println(strings.Split(str, " "))
+	a := make(map[int]int)
+	a[3] = 5
+	_, ok := a[4]
+	fmt.Println(ok)
+	fmt.Println(a[3], a[4])
+	_, ok = a[4]
+	fmt.Println(ok)
 
 }

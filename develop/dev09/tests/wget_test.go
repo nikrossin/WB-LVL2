@@ -42,23 +42,23 @@ func TestMakeBasesDir(t *testing.T) {
 
 func TestIsLinkWithParameters(t *testing.T) {
 	wg := new(wget.Wget)
-	testUrl := []string{
+	testURL := []string{
 		"http://test.ru/one",
 		"http://test.ru/one/two",
 		"http://test.ru/one?q=5",
 		"http://test.ru/one?q=5&b=6",
 	}
-	if wg.IsLinkWithParameters(testUrl[0]) {
-		t.Errorf("Incorrect parse link for params %v", testUrl[0])
+	if wg.IsLinkWithParameters(testURL[0]) {
+		t.Errorf("Incorrect parse link for params %v", testURL[0])
 	}
-	if wg.IsLinkWithParameters(testUrl[1]) {
-		t.Errorf("Incorrect parse link for params %v", testUrl[1])
+	if wg.IsLinkWithParameters(testURL[1]) {
+		t.Errorf("Incorrect parse link for params %v", testURL[1])
 	}
-	if !wg.IsLinkWithParameters(testUrl[2]) {
-		t.Errorf("Incorrect parse link for params %v", testUrl[2])
+	if !wg.IsLinkWithParameters(testURL[2]) {
+		t.Errorf("Incorrect parse link for params %v", testURL[2])
 	}
-	if !wg.IsLinkWithParameters(testUrl[3]) {
-		t.Errorf("Incorrect parse link for params %v", testUrl[3])
+	if !wg.IsLinkWithParameters(testURL[3]) {
+		t.Errorf("Incorrect parse link for params %v", testURL[3])
 	}
 }
 
