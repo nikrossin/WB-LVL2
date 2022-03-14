@@ -1,14 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+	"os"
+)
 
 func main() {
-	a := make(map[int]int)
-	a[3] = 5
-	_, ok := a[4]
-	fmt.Println(ok)
-	fmt.Println(a[3], a[4])
-	_, ok = a[4]
-	fmt.Println(ok)
+	file, _ := os.Open("a.txt")
+
+	data := make([]byte, 2)
+
+	for {
+		n, err := file.Read(data)
+		fmt.Println(1)
+		if err == io.EOF { // если конец файла
+			break // выходим из цикла
+		}
+		fmt.Print(string(data[:n]))
+	}
 
 }
