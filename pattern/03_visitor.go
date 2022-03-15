@@ -2,11 +2,26 @@ package main
 
 import "fmt"
 
+/*
+    поведенческий паттерн, который позволяет добавлять в программу новые операции, не изменяя классы объектов,
+	над которыми эти операции могут выполняться.
+
+	Используется, когда:
+	- Когда новое поведение имеет смысл только для некоторых классов из существующей иерархии
+	Плюсы:
+	Упрощает добавление операций, работающих со сложными структурами объектов.
+	Объединяет родственные операции в одном классе.
+
+	Минусы:
+	усложняет расширение иерархии классов, поскольку новые классы обычно требуют добавления нового метода visit для каждого посетителя
+*/
+
 type Device interface {
 	GetModel() string
 	Accept(Visitor)
 }
 
+// Смартфон
 type SmartPhone struct {
 	model  string
 	cpu    string
@@ -27,6 +42,7 @@ func (p *SmartPhone) GetModel() string {
 	return p.model
 }
 
+// Применить новое поведение
 func (p *SmartPhone) Accept(v Visitor) {
 	v.VisitPhone(p)
 }
@@ -55,11 +71,13 @@ func (w *SmartWatch) Accept(v Visitor) {
 	v.VisitWatch(w)
 }
 
+// Интерфейс встраиваемого класса
 type Visitor interface {
 	VisitWatch(*SmartWatch)
 	VisitPhone(*SmartPhone)
 }
 
+// Индикация заряда устройства, как посетитель - встраиваемый модуль
 type IndicatorCharge struct {
 }
 
@@ -74,6 +92,7 @@ func (i *IndicatorCharge) VisitPhone(p *SmartPhone) {
 	fmt.Printf("Charge of %s phone is %d\n", p.GetModel(), p.charge)
 }
 
+// Проверка утсановлен ли доп модуль устройства, как посетитель - встраиваемый модуль
 type AdditionalModules struct {
 	is bool
 }

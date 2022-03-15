@@ -2,22 +2,45 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"os"
+	"math/rand"
+	"time"
 )
 
-func main() {
-	file, _ := os.Open("a.txt")
+func asChan(vs ...int) <-chan int {
+	c := make(chan int)
 
-	data := make([]byte, 2)
-
-	for {
-		n, err := file.Read(data)
-		fmt.Println(1)
-		if err == io.EOF { // если конец файла
-			break // выходим из цикла
+	go func() {
+		for _, v := range vs {
+			c <- v
+			time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
 		}
-		fmt.Print(string(data[:n]))
-	}
 
+		close(c)
+	}()
+	return c
+}
+
+func merge(a, b <-chan int) <-chan int {
+	c := make(chan int)
+	go func() {
+		for {
+			select {
+			case v := <-a:
+				c <- v
+			case v := <-b:
+				c <- v
+			}
+		}
+	}()
+	return c
+}
+
+func main() {
+
+	c := make(chan int)
+	go func() {
+		time.Sleep(2 * time.Second)
+		close(c)
+	}()
+	fmt.Println(<-c, <-c, <-c, <-c)
 }

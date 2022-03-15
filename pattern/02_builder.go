@@ -1,7 +1,22 @@
+// уменьшения размера конструктора создаваемого объекта;
+// создания немного отличающихся в значениях, но одинаковых в конструкции объектов.
+/*
+ Паттерн Строитель предлагает вынести конструирование объекта за пределы его собственного класса, поручив это дело
+ отдельным объектам, называемым строителями.
+
+плюсы:
+ Создание объекта пошаговое.
+ Позволяет использовать один и тот же код для создания различных но схожих объектов.
+минусы:
+ Усложняет код программы из-за введения дополнительных классов.
+
+*/
+
 package main
 
 import "fmt"
 
+// Класс объекта для конструирования
 type Plane struct {
 	brand string
 	model string
@@ -12,6 +27,7 @@ func NewPlane(br, md string, s int) *Plane {
 	return &Plane{br, md, s}
 }
 
+// Выбор строителя
 func SetBuilder(bType string) Builder {
 	if bType == "Boing" {
 		return NewBoingBuilder()
@@ -21,6 +37,7 @@ func SetBuilder(bType string) Builder {
 	return nil
 }
 
+// Интерфейс строителя
 type Builder interface {
 	setBrand()
 	setModel(string)
@@ -28,6 +45,7 @@ type Builder interface {
 	build() *Plane
 }
 
+// Строитель Airbus
 type AirbusBuilder struct {
 	brand string
 	model string
@@ -37,6 +55,8 @@ type AirbusBuilder struct {
 func NewAirbusBuilder() *AirbusBuilder {
 	return &AirbusBuilder{}
 }
+
+// Методы для "строительства" пошагово объекта
 func (b *AirbusBuilder) setBrand() {
 	b.brand = "Airbus"
 }
@@ -47,10 +67,12 @@ func (b *AirbusBuilder) setSeats(s int) {
 	b.seats = s
 }
 
+// Завершить сборку объекта"
 func (b *AirbusBuilder) build() *Plane {
 	return NewPlane(b.brand, b.model, b.seats)
 }
 
+// СТроитель Boing
 type BoingBuilder struct {
 	brand string
 	model string
