@@ -8,16 +8,19 @@ import (
 	"time"
 )
 
+// Handler Обработчик для запросов сервера
 type Handler struct {
 	Calendar *calendar.CalendarMem
 }
 
+// NewHandler Создание нового обработчика
 func NewHandler() *Handler {
 	return &Handler{
 		calendar.NewCalendarMem(),
 	}
 }
 
+// AddEvent Добавление Нового события  по запросу
 func (h *Handler) AddEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
@@ -39,6 +42,7 @@ func (h *Handler) AddEvent(w http.ResponseWriter, r *http.Request) {
 	responseJSON(false, w, http.StatusOK, "Event create")
 }
 
+// UpdateEvent Обновление события  по запросу
 func (h *Handler) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
@@ -63,6 +67,7 @@ func (h *Handler) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	responseJSON(false, w, http.StatusOK, "Event update")
 }
 
+// DeleteEvent Удаление события  по запросу
 func (h *Handler) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
@@ -86,6 +91,7 @@ func (h *Handler) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 	responseJSON(false, w, http.StatusOK, "Event delete")
 }
 
+// GetEventForDay Получение событий на сутки  по запросу
 func (h *Handler) GetEventForDay(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
@@ -107,6 +113,7 @@ func (h *Handler) GetEventForDay(w http.ResponseWriter, r *http.Request) {
 	responseJSON(false, w, http.StatusOK, events)
 }
 
+// GetEventForWeek Получение событий на неделю по запросу
 func (h *Handler) GetEventForWeek(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))
@@ -128,6 +135,7 @@ func (h *Handler) GetEventForWeek(w http.ResponseWriter, r *http.Request) {
 	responseJSON(false, w, http.StatusOK, events)
 }
 
+// GetEventForMonth Получение событий на месяц по запросу
 func (h *Handler) GetEventForMonth(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		responseJSON(true, w, http.StatusMethodNotAllowed, fmt.Sprintf("method %v not allowed", r.Method))

@@ -13,6 +13,7 @@ type Result struct {
 	Msg interface{} `json:"result"`
 }
 
+// Ответ http
 func responseJSON(isErr bool, w http.ResponseWriter, code int, msg interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(code)

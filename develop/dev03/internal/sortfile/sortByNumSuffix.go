@@ -10,6 +10,7 @@ import (
 
 var suffixes = map[string]int{"n": -9, "mi": -6, "m": -3, "K": 3, "M": 6, "G": 9}
 
+// получить абсолютное число из числа с суффиксом
 func getNum(s string) float64 {
 	for suffix, degree := range suffixes {
 		if strings.HasSuffix(s, suffix) {
@@ -17,7 +18,7 @@ func getNum(s string) float64 {
 			fStr, err := strconv.ParseFloat(strings.TrimSuffix(s, suffix), 32)
 			//если число некорректрое, возвращаем -inf
 			if err != nil {
-				fStr, err = strconv.ParseFloat("-inf", 32) // если колонки нет значение -infinity
+				fStr, err = strconv.ParseFloat("-inf", 32)
 				if err != nil {
 					log.Fatalln(err)
 				}
@@ -29,7 +30,7 @@ func getNum(s string) float64 {
 	//если суффик не найден, проверяем не "чистое" ли это число
 	fStr, err := strconv.ParseFloat(s, 32)
 	if err != nil {
-		fStr, err = strconv.ParseFloat("-inf", 32) // если колонки нет значение -infinity
+		fStr, err = strconv.ParseFloat("-inf", 32) // если не число -inf
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -37,6 +38,7 @@ func getNum(s string) float64 {
 	return fStr
 }
 
+// SortBySuffix Сортировка по числовому суффиксу
 func SortBySuffix(input []string, flags *Flags) []string {
 	resultData := make([]string, 0, len(input))
 	mapData := make(map[float64][]string)  //столбец сортировки:полные строки
@@ -57,14 +59,14 @@ func SortBySuffix(input []string, flags *Flags) []string {
 		mapData[column] = append(mapData[column], line)
 
 	}
-	//fmt.Println(keys)
+
 	if flags.R {
 
 		sort.Sort(sort.Reverse(sort.Float64Slice(keys)))
 	} else {
 		sort.Float64s(keys)
 	}
-	//fmt.Println(keys)
+
 	for _, key := range keys {
 		for _, field := range mapData[key] {
 			resultData = append(resultData, field)

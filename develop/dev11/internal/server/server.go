@@ -9,12 +9,14 @@ import (
 	"time"
 )
 
+// Server Структура Сервера
 type Server struct {
 	Config *Config
 	Hl     *Handler
 	router *http.ServeMux
 }
 
+// NewServer Создание Сервера
 func NewServer(c *Config) *Server {
 	return &Server{
 		c,
@@ -23,6 +25,7 @@ func NewServer(c *Config) *Server {
 	}
 }
 
+// SetRoutes Установить маршрутизацию запросов
 func (s *Server) SetRoutes() http.Handler {
 	s.router.HandleFunc("/create_event", s.Hl.AddEvent)
 	s.router.HandleFunc("/update_event", s.Hl.UpdateEvent)
@@ -33,6 +36,7 @@ func (s *Server) SetRoutes() http.Handler {
 	return s.Logging(s.router)
 }
 
+// Logging Логгирование middleware
 func (s *Server) Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		timeStart := time.Now()
@@ -41,6 +45,7 @@ func (s *Server) Logging(next http.Handler) http.Handler {
 	})
 }
 
+// Run Запуск сервера
 func (s *Server) Run() {
 
 	serv := http.Server{

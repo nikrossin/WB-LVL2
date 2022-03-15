@@ -7,17 +7,21 @@ import (
 	"time"
 )
 
+// CalendarMem Кеш Календаря
 type CalendarMem struct {
 	*sync.RWMutex
 	events map[string]*Event
 }
 
+// NewCalendarMem Создание кеша календаря
 func NewCalendarMem() *CalendarMem {
 	return &CalendarMem{
 		&sync.RWMutex{},
 		make(map[string]*Event),
 	}
 }
+
+// CreateEvent Создание события для календаря
 func (c *CalendarMem) CreateEvent(e *Event) {
 	c.Lock()
 	for {
@@ -31,28 +35,30 @@ func (c *CalendarMem) CreateEvent(e *Event) {
 	c.Unlock()
 }
 
+// UpdateEvent Обновление события в календаре
 func (c *CalendarMem) UpdateEvent(e *Event, uid string) error {
-	if err, in := c.GetEvent(uid); err != nil {
+	err, in := c.GetEvent(uid)
+	if err != nil {
 		return err
-	} else {
-		c.Lock()
-		if e.Title != "" {
-			in.Title = e.Title
-		}
-		if e.Description != "" {
-			in.Description = e.Description
-		}
-		if e.UserId != "" {
-			in.UserId = e.UserId
-		}
-		if !e.Date.IsZero() {
-			in.Date = e.Date
-		}
+	}
+	c.Lock()
+	if e.Title != "" {
+		in.Title = e.Title
+	}
+	if e.Description != "" {
+		in.Description = e.Description
+	}
+	if e.UserId != "" {
+		in.UserId = e.UserId
+	}
+	if !e.Date.IsZero() {
+		in.Date = e.Date
 	}
 	c.Unlock()
 	return nil
 }
 
+// DeleteEvent Удаление события календаря
 func (c *CalendarMem) DeleteEvent(uid string) error {
 	if err, _ := c.GetEvent(uid); err != nil {
 		return err
@@ -62,6 +68,8 @@ func (c *CalendarMem) DeleteEvent(uid string) error {
 	c.Unlock()
 	return nil
 }
+
+// GetEvent Получение События по id
 func (c *CalendarMem) GetEvent(uid string) (error, *Event) {
 	c.RLock()
 	defer c.RUnlock()
@@ -71,6 +79,7 @@ func (c *CalendarMem) GetEvent(uid string) (error, *Event) {
 	return errNotFoundEvent, nil
 }
 
+// EventDay Получение событий пользователя на сутки по дате
 func (c *CalendarMem) EventDay(user string, date time.Time) []*Event {
 	var events []*Event
 	c.RLock()
@@ -83,6 +92,7 @@ func (c *CalendarMem) EventDay(user string, date time.Time) []*Event {
 	return events
 }
 
+// EventWeek Получение событий пользователя на неделю по дате
 func (c *CalendarMem) EventWeek(user string, date time.Time) []*Event {
 	var events []*Event
 	c.RLock()
@@ -97,6 +107,7 @@ func (c *CalendarMem) EventWeek(user string, date time.Time) []*Event {
 	return events
 }
 
+// EventMonth Получение событий пользователя на месяц по дате
 func (c *CalendarMem) EventMonth(user string, date time.Time) []*Event {
 	var events []*Event
 	c.RLock()
@@ -111,6 +122,7 @@ func (c *CalendarMem) EventMonth(user string, date time.Time) []*Event {
 	return events
 }
 
+// Генерация нового UID для события
 func (c *CalendarMem) newID() string {
 	uid := uuid.New()
 	return strings.Replace(uid.String(), "-", "", -1)

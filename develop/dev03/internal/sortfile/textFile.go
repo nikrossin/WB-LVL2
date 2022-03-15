@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Flags Структура хранящая все флаги
 type Flags struct {
 	K int
 	R bool
@@ -20,9 +21,12 @@ type Flags struct {
 	H bool
 }
 
+// NewFlags Создание Flags
 func NewFlags() *Flags {
 	return &Flags{}
 }
+
+// ParseFlags Инициализация стуктуры флагами
 func (flags *Flags) ParseFlags() {
 	flag.IntVar(&flags.K, "k", 1, "указание колонки для сортировки")
 	flag.BoolVar(&flags.N, "n", false, "сортировать по числовому значению")
@@ -35,6 +39,7 @@ func (flags *Flags) ParseFlags() {
 	flag.Parse()
 }
 
+// TextFile Структура с конфигурацией файла для сортировки
 type TextFile struct {
 	*Flags
 	dataStrings []string
@@ -43,12 +48,14 @@ type TextFile struct {
 	isSorted    bool
 }
 
+// NewTextFile Создание TextFile
 func NewTextFile() *TextFile {
 	return &TextFile{
 		Flags: NewFlags(),
 	}
 }
 
+// Чтение из файла и запись в dataString
 func (f *TextFile) Read() {
 	file, err := os.Open(f.inputPath)
 
@@ -67,6 +74,7 @@ func (f *TextFile) Read() {
 
 }
 
+// Запись отсортированных строк в фаил
 func (f *TextFile) Write() {
 	if !f.C {
 		file, err := os.Create(f.outputPath)
@@ -85,12 +93,14 @@ func (f *TextFile) Write() {
 
 }
 
+// SetInputPath Установка пути файла для чтения
 func (f *TextFile) SetInputPath() {
-	f.inputPath = "../cmd/" + flag.Arg(0)
+	f.inputPath = flag.Arg(0)
 
 }
 
+// SetOutputPath Установка пути файла для записи
 func (f *TextFile) SetOutputPath() {
-	f.outputPath = "../cmd/" + flag.Arg(1)
+	f.outputPath = flag.Arg(1)
 
 }

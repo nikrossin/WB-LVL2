@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Модель  для парсинга События из json
 type eventParse struct {
 	Uid         string `json:"uid"`
 	Title       string `json:"title"`
@@ -13,6 +14,7 @@ type eventParse struct {
 	Date        string `json:"date"`
 }
 
+// ConvToModel Конвертировать модель после парсинга в модель для хранения в кеше
 func (ev *eventParse) ConvToModel() *calendar.Event {
 	event := calendar.NewEvent()
 	event.Uid = ev.Uid
@@ -23,6 +25,7 @@ func (ev *eventParse) ConvToModel() *calendar.Event {
 	return event
 }
 
+// ValidateToCreate Валидация данных при запросе на создание события
 func (ev *eventParse) ValidateToCreate() bool {
 	if ev.UserId == "" || ev.Title == "" {
 		return false
@@ -34,6 +37,7 @@ func (ev *eventParse) ValidateToCreate() bool {
 	return true
 }
 
+// ValidateToUpdate Валидация данных при запросе на обновление события
 func (ev *eventParse) ValidateToUpdate() bool {
 	if ev.Uid == "" {
 		return false
@@ -47,6 +51,7 @@ func (ev *eventParse) ValidateToUpdate() bool {
 	return true
 }
 
+// ValidateToDelete Валидация данных при запросе на удаление события
 func (ev *eventParse) ValidateToDelete() bool {
 	if ev.Uid == "" {
 		return false

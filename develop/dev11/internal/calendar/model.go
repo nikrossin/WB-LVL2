@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Event Модель события для хранения в кеше
 type Event struct {
 	Uid         string    `json:"uid"`
 	Title       string    `json:"title"`
@@ -12,6 +13,7 @@ type Event struct {
 	Date        time.Time `json:"date"`
 }
 
+// NewEvent Создание нового пустого события
 func NewEvent() *Event {
 	return new(Event)
 }
